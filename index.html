@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theory of Computation Master Quiz Platform</title>
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --accent: #f59e0b;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-main); color: var(--text-primary); padding: 2rem 1rem; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 2.5rem; }
+        header h1 { font-size: 2.25rem; color: var(--primary); margin-bottom: 0.5rem; }
+        header p { color: var(--text-secondary); font-size: 1.1rem; }
+
+        .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        
+        .file-upload-zone { border: 2px dashed var(--primary); background: #f5f3ff; padding: 2rem; text-align: center; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .file-upload-zone:hover { background: #eedffc; }
+        .file-upload-zone p { color: var(--primary); font-weight: 600; }
+        textarea { width: 100%; height: 150px; margin-top: 1rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 0.9rem; resize: vertical; }
+        
+        .btn { background: var(--primary); color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; display: inline-block; }
+        .btn:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--text-secondary); }
+        .btn-secondary:hover { background: #475569; }
+
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+        .umbrella-card { border: 1px solid var(--border); padding: 1rem; border-radius: 8px; cursor: pointer; background: var(--bg-main); transition: transform 0.2s, border-color 0.2s; }
+        .umbrella-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .umbrella-card h4 { font-size: 0.95rem; margin-bottom: 0.5rem; color: var(--primary); }
+        .umbrella-card p { font-size: 0.8rem; color: var(--text-secondary); }
+
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .progress-bar-container { background: var(--border); border-radius: 10px; height: 8px; width: 100%; margin-bottom: 1.5rem; overflow: hidden; }
+        .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
+
+        .question-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; white-space: pre-wrap; }
+        .options-list { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+        .option-item { border: 1px solid var(--border); padding: 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+        .option-item:hover { background: #f8fafc; border-color: var(--text-secondary); }
+        .option-item.selected { border-color: var(--primary); background: #f5f3ff; color: var(--primary); }
+        .option-item.correct { background: var(--success-bg); border-color: var(--success); color: #065f46; }
+        .option-item.incorrect { background: var(--danger-bg); border-color: var(--danger); color: #991b1b; }
+
+        .explanation-box { margin-top: 1.5rem; padding: 1.5rem; border-radius: 8px; background: #f0fdf4; border-left: 4px solid var(--success); display: none; }
+        .explanation-box h4 { color: #166534; margin-bottom: 0.5rem; }
+        .explanation-box p { font-size: 0.95rem; color: #1e3a1e; white-space: pre-wrap; }
+
+        .actions { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .hidden { display: none !important; }
+        
+        .score-display { text-align: center; padding: 2rem 0; }
+        .score-num { font-size: 4rem; font-weight: 800; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Theory of Computation Study Desk</h1>
+        <p>Interactive Concept-by-Concept Exam Preparation Engine</p>
+    </header>
+
+    <div id="setup-screen" class="card">
+        <h2>1. Load Your Quiz Data Script</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Upload the generated <code>quiz_data.json</code> file or paste its raw JSON content below to spin up your training environment.</p>
+        
+        <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
+            <p>📁 Click here to upload your .json script file</p>
+            <input type="file" id="file-input" class="hidden" accept=".json">
+        </div>
+        
+        <textarea id="json-paste" placeholder="Alternatively, paste raw JSON string content here..."></textarea>
+        
+        <div style="margin-top: 1.5rem; text-align: right;">
+            <button class="btn" onclick="loadQuizData()">Initialize System</button>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="card hidden">
+        <h2>2. Select Your Training Umbrella</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select a focused concept pillar to practice, or mix all questions together for an exam-level challenge.</p>
+        
+        <button class="btn" style="width: 100%; margin-bottom: 1rem;" onclick="startQuiz('all')">🌪️ Run Comprehensive Exam (All 50 Mixed Questions)</button>
+        
+        <div class="dashboard-grid" id="umbrella-list">
+            </div>
+    </div>
+
+    <div id="quiz-screen" class="card hidden">
+        <div class="quiz-header">
+            <span id="quiz-category" style="font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.85rem; tracking-letter: 0.05em;">Umbrella Focus</span>
+            <span id="quiz-progress" style="color: var(--text-secondary); font-weight: 600;">Question 1 of 10</span>
+        </div>
+        <div class="progress-bar-container">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+
+        <div id="question-container">
+            <div class="question-text" id="q-text">Question text goes here?</div>
+            <ul class="options-list" id="q-options">
+                </ul>
+        </div>
+
+        <div class="explanation-box" id="explanation-container">
+            <h4>💡 Step-by-Step Resolution Strategy:</h4>
+            <p id="explanation-text">Explanation content goes here...</p>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-secondary" id="exit-btn" onclick="exitQuiz()">Exit Framework</button>
+            <button class="btn hidden" id="submit-btn" onclick="evaluateAnswer()">Verify Answer</button>
+            <button class="btn hidden" id="next-btn" onclick="advanceQuiz()">Advance Next ➡️</button>
+        </div>
+    </div>
+
+    <div id="result-screen" class="card hidden">
+        <div class="score-display">
+            <h2>Training Phase Complete!</h2>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">Your tracked mastery score for this concept iteration:</p>
+            <div class="score-num" id="final-score">80%</div>
+            <p id="score-summary" style="font-weight: 600; margin-bottom: 1.5rem;">Excellent! Ready for the test block.</p>
+            <button class="btn" onclick="showDashboard()">Return to Central Dashboard</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let masterData = null;
+    let activeQuestions = [];
+    let currentIndex = 0;
+    let selectedOptionIdx = null;
+    let correctAnswersCount = 0;
+
+    // Handle File Uploads
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        let reader = new FileReader();
+        reader.onload = function(event) {
+            document.getElementById('json-paste').value = event.target.result;
+        };
+        reader.readAsText(e.target.files[0]);
+    });
+
+    function loadQuizData() {
+        const rawText = document.getElementById('json-paste').value.trim();
+        if (!rawText) {
+            alert("Please paste data or upload a JSON script before initializing.");
+            return;
+        }
+        try {
+            masterData = JSON.parse(rawText);
+            buildDashboard();
+            showDashboard();
+        } catch (e) {
+            alert("Malformed input: Ensure your file string is valid JSON format. Details: " + e.message);
+        }
+    }
+
+    function buildDashboard() {
+        const grid = document.getElementById('umbrella-list');
+        grid.innerHTML = '';
+        
+        masterData.umbrellas.forEach(umb => {
+            const card = document.createElement('div');
+            card.className = 'umbrella-card';
+            card.onclick = () => startQuiz(umb.id);
+            card.innerHTML = `
+                <h4>Umbrella ${umb.id}: ${umb.title}</h4>
+                <p>Contains ${umb.questions.length} structured skill levels up to exam difficulty.</p>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function showDashboard() {
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('dashboard-screen').classList.remove('hidden');
+    }
+
+    function startQuiz(umbrellaId) {
+        activeQuestions = [];
+        currentIndex = 0;
+        correctAnswersCount = 0;
+        selectedOptionIdx = null;
+
+        if (umbrellaId === 'all') {
+            document.getElementById('quiz-category').innerText = "Comprehensive Exam Integration";
+            masterData.umbrellas.forEach(umb => {
+                activeQuestions = activeQuestions.concat(umb.questions);
+            });
+            // Shuffle mixed questions
+            activeQuestions.sort(() => Math.random() - 0.5);
+        } else {
+            const selected = masterData.umbrellas.find(u => u.id == umbrellaId);
+            document.getElementById('quiz-category').innerText = `Umbrella ${selected.id}: ${selected.title}`;
+            activeQuestions = [...selected.questions]; // Maintain level order intentionally
+        }
+
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        renderCurrentQuestion();
+    }
+
+    function renderCurrentQuestion() {
+        selectedOptionIdx = null;
+        document.getElementById('submit-btn').classList.add('hidden');
+        document.getElementById('next-btn').classList.add('hidden');
+        document.getElementById('explanation-container').style.display = 'none';
+
+        const q = activeQuestions[currentIndex];
+        
+        // Progress handling
+        document.getElementById('quiz-progress').innerText = `Level Question ${currentIndex + 1} of ${activeQuestions.length}`;
+        document.getElementById('progress-bar').style.width = `${((currentIndex) / activeQuestions.length) * 100}%`;
+
+        document.getElementById('q-text').innerText = `[Level ${q.level}] ${q.question}`;
+        
+        const optionsList = document.getElementById('q-options');
+        optionsList.innerHTML = '';
+        
+        q.options.forEach((opt, idx) => {
+            const li = document.createElement('li');
+            li.className = 'option-item';
+            li.innerText = opt;
+            li.onclick = () => selectOption(idx, li);
+            optionsList.appendChild(li);
+        });
+    }
+
+    function selectOption(idx, element) {
+        if (!document.getElementById('next-btn').classList.contains('hidden')) return; // Already locked in
+        
+        selectedOptionIdx = idx;
+        const options = document.querySelectorAll('.option-item');
+        options.forEach(o => o.classList.remove('selected'));
+        element.classList.add('selected');
+        
+        document.getElementById('submit-btn').classList.remove('hidden');
+    }
+
+    function evaluateAnswer() {
+        document.getElementById('submit-btn').classList.add('hidden');
+        const q = activeQuestions[currentIndex];
+        const options = document.querySelectorAll('.option-item');
+        
+        options[selectedOptionIdx].classList.remove('selected');
+        
+        if (selectedOptionIdx === q.correctIdx) {
+            options[selectedOptionIdx].classList.add('correct');
+            correctAnswersCount++;
+        } else {
+            options[selectedOptionIdx].classList.add('incorrect');
+            options[q.correctIdx].classList.add('correct'); // Highlight accurate path
+        }
+
+        // Show Explanation
+        document.getElementById('explanation-text').innerText = q.explanation;
+        document.getElementById('explanation-container').style.display = 'block';
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function advanceQuiz() {
+        currentIndex++;
+        if (currentIndex < activeQuestions.length) {
+            renderCurrentQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.remove('hidden');
+        
+        const pct = Math.round((correctAnswersCount / activeQuestions.length) * 100);
+        document.getElementById('final-score').innerText = `${pct}%`;
+        
+        let summary = "";
+        if (pct >= 75) summary = "🥇 Mastery Confirmed! You are fully locked and loaded for exam-level distribution questions.";
+        else if (pct >= 50) summary = "🥈 Competent Baseline! Go back through the explanations to eliminate unforced execution drops.";
+        else summary = "⚠️ Core Knowledge Gaps Identified. Rerun this specific umbrella level-by-level to anchor theoretical foundations.";
+        
+        document.getElementById('score-summary').innerText = summary;
+    }
+
+    function exitQuiz() {
+        if(confirm("Are you sure you want to exit this current running track? Progress will be dropped.")) {
+            showDashboard();
+        }
+    }
+</script>
+</body>
+</html>
