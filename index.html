@@ -96,6 +96,8 @@
         .explanation-box p { font-size: 0.95rem; color: #1e3a1e; white-space: pre-wrap; }
 
         .actions { display: flex; justify-content: space-between; margin-top: 2rem; }
+        .setup-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap; }
+        .icon-square { display: inline-block; width: 10px; height: 10px; background: var(--primary); border: 1px solid var(--border); margin-right: 0.5rem; vertical-align: middle; }
         .hidden { display: none !important; }
         
         .score-display { text-align: center; padding: 2rem 0; }
@@ -112,25 +114,29 @@
 
     <div id="setup-screen" class="card">
         <h2>1. Load Your Quiz Data Script</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Upload the generated <code>quiz_data.json</code> file or paste its raw JSON content below to spin up your training environment.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Upload a <code>quiz_data.json</code> file or paste JSON content below. Initialize once, then append more files to extend your question bank.</p>
         
         <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
-            <p>Click here to upload your .json script file</p>
+            <p><span class="icon-square" aria-hidden="true"></span>Click here to upload your .json script file</p>
             <input type="file" id="file-input" class="hidden" accept=".json">
         </div>
         
         <textarea id="json-paste" placeholder="Alternatively, paste raw JSON string content here..."></textarea>
         
-        <div style="margin-top: 1.5rem; text-align: right;">
+        <div class="setup-actions">
             <button class="btn" onclick="loadQuizData()">Initialize System</button>
+            <button class="btn btn-secondary" onclick="appendQuizData()">Add Questions</button>
         </div>
     </div>
 
     <div id="dashboard-screen" class="card hidden">
         <h2>2. Select Your Training Umbrella</h2>
         <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select a focused concept pillar to practice, or mix all questions together for an exam-level challenge.</p>
+        <div style="text-align: right; margin-bottom: 1rem;">
+            <button class="btn btn-secondary" onclick="showSetup()">Load or Add Data</button>
+        </div>
         
-        <button class="btn" style="width: 100%; margin-bottom: 1rem;" onclick="startQuiz('all')">Run Comprehensive Exam (All Mixed Questions)</button>
+        <button class="btn" id="comprehensive-btn" style="width: 100%; margin-bottom: 1rem;" onclick="startQuiz('all')">Run Comprehensive Exam (All Mixed Questions)</button>
         
         <div class="dashboard-grid" id="umbrella-list">
             </div>
@@ -200,12 +206,59 @@
             return;
         }
         try {
-            masterData = JSON.parse(rawText);
+            masterData = parseQuizData(rawText);
             buildDashboard();
             showDashboard();
         } catch (e) {
-            alert("Malformed input: Ensure your file string is valid JSON format. Details: " + e.message);
+            alert("Malformed input: Ensure your input is valid JSON format. Details: " + e.message);
         }
+    }
+
+    function appendQuizData() {
+        const rawText = document.getElementById('json-paste').value.trim();
+        if (!rawText) {
+            alert("Please paste data or upload a JSON script before adding questions.");
+            return;
+        }
+        if (!masterData) {
+            alert("Initialize the system first, then use Add Questions to merge more data.");
+            return;
+        }
+        try {
+            const incomingData = parseQuizData(rawText);
+            mergeQuizData(masterData, incomingData);
+            buildDashboard();
+            alert("Questions added successfully.");
+        } catch (e) {
+            alert("Malformed input: Ensure your input is valid JSON format. Details: " + e.message);
+        }
+    }
+
+    function parseQuizData(rawText) {
+        const parsed = JSON.parse(rawText);
+        if (!parsed || !Array.isArray(parsed.umbrellas)) {
+            throw new Error("JSON must include an 'umbrellas' array.");
+        }
+        parsed.umbrellas.forEach((umb, idx) => {
+            if (!umb || typeof umb !== "object" || !Array.isArray(umb.questions)) {
+                throw new Error(`Umbrella at index ${idx} must include a 'questions' array.`);
+            }
+        });
+        return parsed;
+    }
+
+    function mergeQuizData(baseData, incomingData) {
+        incomingData.umbrellas.forEach(incomingUmb => {
+            const existingUmb = baseData.umbrellas.find(umb => String(umb.id) === String(incomingUmb.id));
+            if (!existingUmb) {
+                baseData.umbrellas.push(incomingUmb);
+                return;
+            }
+            existingUmb.questions = existingUmb.questions.concat(incomingUmb.questions);
+            if (!existingUmb.title && incomingUmb.title) {
+                existingUmb.title = incomingUmb.title;
+            }
+        });
     }
 
     function buildDashboard() {
@@ -222,6 +275,12 @@
             `;
             grid.appendChild(card);
         });
+        updateComprehensiveButton();
+    }
+
+    function updateComprehensiveButton() {
+        const totalQuestions = masterData.umbrellas.reduce((sum, umb) => sum + umb.questions.length, 0);
+        document.getElementById('comprehensive-btn').innerText = `Run Comprehensive Exam (${totalQuestions} Mixed Questions)`;
     }
 
     function showDashboard() {
@@ -229,6 +288,13 @@
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').classList.add('hidden');
         document.getElementById('dashboard-screen').classList.remove('hidden');
+    }
+
+    function showSetup() {
+        document.getElementById('dashboard-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').classList.add('hidden');
+        document.getElementById('setup-screen').classList.remove('hidden');
     }
 
     function startQuiz(umbrellaId) {
