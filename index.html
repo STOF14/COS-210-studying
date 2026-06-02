@@ -115,7 +115,7 @@
         <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Upload the generated <code>quiz_data.json</code> file or paste its raw JSON content below to spin up your training environment.</p>
         
         <div class="file-upload-zone" onclick="document.getElementById('file-input').click()">
-            <p>📁 Click here to upload your .json script file</p>
+            <p>Click here to upload your .json script file</p>
             <input type="file" id="file-input" class="hidden" accept=".json">
         </div>
         
@@ -130,7 +130,7 @@
         <h2>2. Select Your Training Umbrella</h2>
         <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Select a focused concept pillar to practice, or mix all questions together for an exam-level challenge.</p>
         
-        <button class="btn" style="width: 100%; margin-bottom: 1rem;" onclick="startQuiz('all')">🌪️ Run Comprehensive Exam (All 50 Mixed Questions)</button>
+        <button class="btn" style="width: 100%; margin-bottom: 1rem;" onclick="startQuiz('all')">Run Comprehensive Exam (All Mixed Questions)</button>
         
         <div class="dashboard-grid" id="umbrella-list">
             </div>
@@ -152,14 +152,14 @@
         </div>
 
         <div class="explanation-box" id="explanation-container">
-            <h4>💡 Step-by-Step Resolution Strategy:</h4>
+            <h4>Step-by-Step Resolution Strategy:</h4>
             <p id="explanation-text">Explanation content goes here...</p>
         </div>
 
         <div class="actions">
             <button class="btn btn-secondary" id="exit-btn" onclick="exitQuiz()">Exit Framework</button>
             <button class="btn hidden" id="submit-btn" onclick="evaluateAnswer()">Verify Answer</button>
-            <button class="btn hidden" id="next-btn" onclick="advanceQuiz()">Advance Next ➡️</button>
+            <button class="btn hidden" id="next-btn" onclick="advanceQuiz()">Advance Next</button>
         </div>
     </div>
 
@@ -333,9 +333,9 @@
         document.getElementById('final-score').innerText = `${pct}%`;
         
         let summary = "";
-        if (pct >= 75) summary = "🥇 Mastery Confirmed! You are fully locked and loaded for exam-level distribution questions.";
-        else if (pct >= 50) summary = "🥈 Competent Baseline! Go back through the explanations to eliminate unforced execution drops.";
-        else summary = "⚠️ Core Knowledge Gaps Identified. Rerun this specific umbrella level-by-level to anchor theoretical foundations.";
+        if (pct >= 75) summary = "Mastery Confirmed! You are fully locked and loaded for exam-level distribution questions.";
+        else if (pct >= 50) summary = "Competent Baseline! Go back through the explanations to eliminate unnecessary mistakes.";
+        else summary = "Core Knowledge Gaps Identified. Rerun this specific umbrella level-by-level to anchor theoretical foundations.";
         
         document.getElementById('score-summary').innerText = summary;
     }
