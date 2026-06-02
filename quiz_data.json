@@ -1,0 +1,634 @@
+{
+  "umbrellas": [
+    {
+      "id": 1,
+      "title": "Deterministic Finite Automata (DFAs) & Language Design",
+      "questions": [
+        {
+          "level": 1,
+          "question": "Formally, a Deterministic Finite Automaton (DFA) is defined as a 5-tuple (Q, Σ, δ, q0, F). What is the exact mathematical definition of the state transition function δ?",
+          "options": [
+            "δ : Q × Σ → Q",
+            "δ : Q × (Σ ∪ {ε}) → Q",
+            "δ : Q × Σ → P(Q)",
+            "δ : Q × (Σ ∪ {ε}) → P(Q)"
+          ],
+          "correctIdx": 0,
+          "explanation": "By definition (Textbook Sec 2.2), a DFA is strictly deterministic. Its transition function maps a single active state and a single input symbol from the alphabet to exactly one next state: δ : Q × Σ → Q."
+        },
+        {
+          "level": 2,
+          "question": "Let Σ = {a, b}. You are designing a DFA for the language L = {w | w ends with the prefix block 'ab'}. What is the absolute minimum number of states required to construct this machine completely without language leakage?",
+          "options": [
+            "2 states",
+            "3 states",
+            "4 states",
+            "5 states"
+          ],
+          "correctIdx": 1,
+          "explanation": "You need 3 states: q0 (haven't seen 'a'), q1 (just seen 'a'), and q2 (just seen 'ab' and accepting). If a 'b' arrives in q0, we stay in q0. If an 'a' arrives in q1, we loop in q1. If we are in q2, an 'a' shifts back to q1, and a 'b' resets us to q0."
+        },
+        {
+          "level": 3,
+          "question": "Suppose a language over Σ = {a, b} contains strings where the total count of 'a's is strictly a multiple of 3. How does the state definition reflect this constraint via standard modular arithmetic?",
+          "options": [
+            "We maintain 3 distinct states, tracking counts modulo 3 (remainder 0, 1, or 2).",
+            "We need 4 states to map up to index 3 before looping back to the initial index.",
+            "We can loop infinitely on state q0 using algebraic tracking variables.",
+            "Finite automata cannot track numerical values beyond a single bit buffer."
+          ],
+          "correctIdx": 0,
+          "explanation": "To check if Na(w) ≡ 0 (mod 3), the DFA needs exactly three tracking states corresponding to the remainders: [0], [1], and [2]. State [0] is the designated start and accepting state."
+        },
+        {
+          "level": 4,
+          "question": "If a DFA contains a 'trap state' (or dead state), what properties characterize this state regarding transitions and acceptance?",
+          "options": [
+            "It is a non-accepting state that loops to itself on every symbol in alphabet Σ.",
+            "It automatically forces the machine to crash and output an execution error.",
+            "It is an accepting state that blocks any further processing loops.",
+            "It can dynamically transition back to valid tracks if an ε is processed."
+          ],
+          "correctIdx": 0,
+          "explanation": "A trap state handles invalid inputs. Once entered, the string cannot be accepted, so the state must be non-accepting and loop back to itself on every single character in the alphabet Σ."
+        },
+        {
+          "level": 5,
+          "question": "Consider the alphabet Σ = {a, b}. A DFA needs to accept strings that do NOT contain the substring 'aa'. If state q0 is the start (no 'a' seen) and q1 means 'one 'a' seen', where should an input of 'a' lead from state q1?",
+          "options": [
+            "To a non-accepting trap state q2",
+            "Loop back to state q1",
+            "Return to the initial state q0",
+            "Directly to an accepting exit state"
+          ],
+          "correctIdx": 0,
+          "explanation": "If the machine is in q1 (already saw one 'a') and receives another 'a', the substring 'aa' has been detected. Because the language specifies strings that do NOT contain 'aa', this violates the condition, forcing a transition to a permanent non-accepting trap state."
+        },
+        {
+          "level": 6,
+          "question": "How do you construct the complement language L' of a given regular language tracked by a fully specified valid DFA M?",
+          "options": [
+            "Keep the exact same configuration but swap all non-accepting states into accepting states and vice versa.",
+            "Reverse the direction of all directional transition paths inside the state diagram matrix.",
+            "Convert the automaton into an NFA structure and change all transitions to ε values.",
+            "Delete the original trap states and leave those specific paths entirely undefined."
+          ],
+          "correctIdx": 0,
+          "explanation": "To complement a language accepted by a complete DFA, you invert the acceptance values. Every state in (Q \\ F) becomes an accepting state, and every state in F becomes non-accepting."
+        },
+        {
+          "level": 7,
+          "question": "Let L be the language over Σ = {0, 1} representing binary strings that evaluate to an even number when interpreted in base-2. What is the design requirement for this DFA?",
+          "options": [
+            "The machine accepts if and only if the final processed symbol is '0'.",
+            "The machine accepts if and only if the total string length is even.",
+            "The machine tracks the difference between the total number of 0s and 1s.",
+            "The machine requires an infinite tape to evaluate total base-2 magnitude values."
+          ],
+          "correctIdx": 0,
+          "explanation": "In binary, any number ending in '0' is even (e.g., 2=10, 4=100), and any ending in '1' is odd. The DFA simply looks at the final symbol: any transition on '0' goes to the accepting state, and any transition on '1' goes to a non-accepting state."
+        },
+        {
+          "level": 8,
+          "question": "If you perform a Cartesian Product Construction to find the intersection of DFA M1 (with n states) and DFA M2 (with m states), what is the maximum number of states in the combined product machine?",
+          "options": [
+            "n × m states",
+            "n + m states",
+            "2^(n+m) states",
+            "max(n, m) states"
+          ],
+          "correctIdx": 0,
+          "explanation": "The product construction pairs the states of both machines, creating states of the form (qi, qj). The total set of possible state combinations is the Cartesian product Q1 × Q2, which has a maximum size of n × m states."
+        },
+        {
+          "level": 9,
+          "question": "A complete DFA is designed over Σ = {a, b} where every string must have an even number of 'a's AND an even number of 'b's. If the machine receives the string 'ab', which state is it in relative to the start state q00?",
+          "options": [
+            "State q11 (Tracking an odd number of 'a's and an odd number of 'b's)",
+            "State q10 (Tracking an odd number of 'a's and an even number of 'b's)",
+            "State q01 (Tracking an even number of 'a's and an odd number of 'b's)",
+            "Back in the initial starting configuration state q00"
+          ],
+          "correctIdx": 0,
+          "explanation": "Processing 'ab' means we have seen exactly one 'a' (making the count odd) and exactly one 'b' (making the count odd). The machine moves to state q11, which tracks when both counts are odd."
+        },
+        {
+          "level": 10,
+          "question": "[EXAM LEVEL] Design a DFA over Σ = {a, b} that accepts a string if the number of 'a's is a multiple of 3 AND the number of 'b's is odd. If we map the states as q_{ij} where i = Na mod 3 and j = Nb mod 2, identify the correct transition sequence from the start state for the input string 'aaba'.",
+          "options": [
+            "q00 → q10 → q20 → q21 → q01",
+            "q00 → q10 → q20 → q00 → q01",
+            "q00 → q10 → q11 → q21 → q00",
+            "q00 → q01 → q02 → q10 → q11"
+          ],
+          "correctIdx": 0,
+          "explanation": "Let's trace 'aaba' step-by-step from q00:\n1. Input 'a': Na=1, Nb=0 → q10\n2. Input 'a': Na=2, Nb=0 → q20\n3. Input 'b': Na=2, Nb=1 → q21\n4. Input 'a': Na=3≡0, Nb=1 → q01\nThis matches the sequence: q00 → q10 → q20 → q21 → q01."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Nondeterministic Finite Automata (NFAs) & ε-Transitions",
+      "questions": [
+        {
+          "level": 1,
+          "question": "What is the key mathematical difference in the codomain of the transition function δ for an NFA compared to a standard DFA?",
+          "options": [
+            "It maps to the Power Set of states P(Q) instead of a single state Q.",
+            "It maps to a set of ordered coordinate pairs within Q × Q space.",
+            "It allows mapping directly to undefined complex algebraic spaces.",
+            "It is restricted to map exclusively to accepting set configurations."
+          ],
+          "correctIdx": 0,
+          "explanation": "For an NFA, δ: Q × Σ → P(Q). Instead of transitioning to a single next state, the NFA can transition to a subset of Q (including the empty set ∅ if no transitions match)."
+        },
+        {
+          "level": 2,
+          "question": "An NFA processes an input string and encounters a situation where for a given state and input symbol, the transition function returns the empty set ∅. What does this mean for this execution path?",
+          "options": [
+            "The specific computation path dies immediately.",
+            "The machine automatically resets to the initial starting state.",
+            "The path loops indefinitely until an ε transition opens.",
+            "The machine accepts the string by default."
+          ],
+          "correctIdx": 1,
+          "explanation": "If δ(q, x) = ∅, there are no valid next states for this path on input x. This computation path dies. The string is only accepted if at least one alternative path successfully reaches an accepting state."
+        },
+        {
+          "level": 3,
+          "question": "What does an epsilon (ε) transition allow an NFA to do during computation?",
+          "options": [
+            "Change states without reading any characters from the input string.",
+            "Automatically erase the last processed character from the input buffer.",
+            "Force the machine to halt and accept the remaining substring.",
+            "Jump directly to the final state, bypassing all intermediate rules."
+          ],
+          "correctIdx": 0,
+          "explanation": "An ε-transition allows an NFA to change its state without consuming any input symbols, enabling the machine to look ahead or branch non-deterministically."
+        },
+        {
+          "level": 4,
+          "question": "Under what condition does an NFA accept an input string w?",
+          "options": [
+            "If there is at least one path through the machine that ends in an accepting state after reading all of w.",
+            "If every single possible path through the machine ends in an accepting state.",
+            "If the machine completes processing without entering a dead state loop.",
+            "If the total number of active paths matches the number of accepting states."
+          ],
+          "correctIdx": 0,
+          "explanation": "An NFA accepts a string if there exists *at least one* valid sequence of choices that consumes the entire input string and ends in an accepting state."
+        },
+        {
+          "level": 5,
+          "question": "You are designing an NFA over Σ = {a, b} to recognize strings that contain 'bb' or 'aba'. How do ε-transitions help simplify this design?",
+          "options": [
+            "By creating a start state that branches to separate tracking paths for 'bb' and 'aba' without reading input.",
+            "By allowing the machine to compress the two target strings into a single state.",
+            "By eliminating the need to track inputs, since ε matches any character.",
+            "By converting the non-deterministic layout back into a sequential DFA structure."
+          ],
+          "correctIdx": 0,
+          "explanation": "ε-transitions allow you to create a parallel structure. The start state can branch into two independent sub-automata—one for 'bb' and one for 'aba'—without consuming the first input symbol."
+        },
+        {
+          "level": 6,
+          "question": "How do you calculate the Epsilon-Closure, denoted as C_ε(q), for a given state q in an NFA?",
+          "options": [
+            "It is the set of all states reachable from q by following zero or more consecutive ε-transitions.",
+            "It is the set of states that can transition directly to q when reading an ε symbol.",
+            "It is the total count of ε paths that originate from the initial starting state.",
+            "It is the set of states that do not have any outgoing ε transitions."
+          ],
+          "correctIdx": 0,
+          "explanation": "The ε-closure of a state q, C_ε(q), includes state q itself along with any other states that can be reached by following one or more ε-transitions without reading any input symbols."
+        },
+        {
+          "level": 7,
+          "question": "Consider an NFA state diagram where state 1 has an ε-transition to state 2, and state 2 has an ε-transition to state 3. What is the explicit ε-closure of the set containing just state 1?",
+          "options": [
+            "{1, 2, 3}",
+            "{1, 2}",
+            "{2, 3}",
+            "{1}"
+          ],
+          "correctIdx": 0,
+          "explanation": "Starting at state 1, you can reach state 1 (by taking 0 transitions), state 2 (via 1 ε-transition), and state 3 (by following the path from 1 to 2 to 3 via ε-transitions). Thus, C_ε({1}) = {1, 2, 3}."
+        },
+        {
+          "level": 8,
+          "question": "Why can an NFA recognize languages with significantly fewer states than an equivalent minimal DFA?",
+          "options": [
+            "Because an NFA can look ahead and branch along multiple parallel paths simultaneously.",
+            "Because NFAs use a more compact mathematical definition for their alphabet set.",
+            "Because NFAs are allowed to skip reading sections of the input string entirely.",
+            "Because the states in an NFA can store complex execution histories."
+          ],
+          "correctIdx": 0,
+          "explanation": "NFAs can explore multiple paths at the same time through non-determinism. A DFA must use distinct states to track every combination of history, often requiring up to 2^n states to match an n-state NFA."
+        },
+        {
+          "level": 9,
+          "question": "If an NFA has an initial start state q0, and C_ε(q0) includes an accepting state, what does this tell you about the language accepted by the NFA?",
+          "options": [
+            "The language must include the empty string ε.",
+            "The language cannot accept any strings containing regular symbols.",
+            "The automaton is invalid and will loop infinitely.",
+            "Every string over the alphabet Σ will be accepted."
+          ],
+          "correctIdx": 0,
+          "explanation": "If an accepting state is within the ε-closure of the start state, the NFA can reach that accepting state without reading any input symbols. This means the empty string ε is accepted by the machine."
+        },
+        {
+          "level": 10,
+          "question": "[EXAM LEVEL] Consider an NFA where δ(1,a)={1,2}, δ(1,b)=∅, δ(1,ε)={2}; δ(2,a)=∅, δ(2,b)={3}, δ(2,ε)=∅; δ(3,a)={3}, δ(3,b)={1,3}, δ(3,ε)={1}. Find the exact values for C_ε(1), C_ε(2), and C_ε(3).",
+          "options": [
+            "C_ε(1)={1,2}; C_ε(2)={2}; C_ε(3)={3,1,2}",
+            "C_ε(1)={1}; C_ε(2)={2}; C_ε(3)={3}",
+            "C_ε(1)={1,2,3}; C_ε(2)={2}; C_ε(3)={3,1}",
+            "C_ε(1)={2}; C_ε(2)={3}; C_ε(3)={1}"
+          ],
+          "correctIdx": 0,
+          "explanation": "Let's compute the closures step-by-step:\n- For state 1: It has an ε-transition to 2, and 2 has no outgoing ε-transitions. So C_ε(1) = {1, 2}.\n- For state 2: It has no outgoing ε-transitions. So C_ε(2) = {2}.\n- For state 3: It has an ε-transition to 1. From state 1, we can follow the ε-transition to 2. So C_ε(3) = {3, 1, 2}."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Subset Construction (NFA to DFA Conversion)",
+      "questions": [
+        {
+          "level": 1,
+          "question": "What does each individual state in a DFA created via the subset construction method represent relative to the original NFA?",
+          "options": [
+            "A distinct subset of states from the original NFA.",
+            "A single state chosen from the NFA's active paths.",
+            "The length of the longest path through the NFA.",
+            "An array index tracking the input string."
+          ],
+          "correctIdx": 0,
+          "explanation": "Subset construction maps the power set of NFA states to DFA states. Each state in the new DFA represents a subset of states that the NFA could be in simultaneously after reading a given input."
+        },
+        {
+          "level": 2,
+          "question": "When converting an NFA with a state set Q into an equivalent DFA, what is the theoretical upper limit on the number of states in the resulting DFA?",
+          "options": [
+            "2^|Q| states",
+            "|Q|^2 states",
+            "2 × |Q| states",
+            "|Q|! states"
+          ],
+          "correctIdx": 0,
+          "explanation": "Because each state in the new DFA corresponds to a subset of the NFA's states, the maximum number of states is equal to the size of the power set of Q, which is 2^|Q|."
+        },
+        {
+          "level": 3,
+          "question": "How do you determine the initial start state of a DFA when performing subset construction on an NFA whose start state is q0?",
+          "options": [
+            "It is the ε-closure of the NFA's start state: C_ε({q0}).",
+            "It is always the single-element set containing just {q0}.",
+            "It is the empty set state ∅ by default.",
+            "It is the set containing all accepting states in the NFA."
+          ],
+          "correctIdx": 0,
+          "explanation": "The DFA must account for any ε-transitions available at the start of computation. Therefore, the initial state of the DFA is the ε-closure of the NFA's start state, C_ε({q0})."
+        },
+        {
+          "level": 4,
+          "question": "When converting an NFA to a DFA, how do you decide if a newly created macro-state (subset of states) should be an accepting state?",
+          "options": [
+            "If the subset contains at least one accepting state from the original NFA.",
+            "Only if every state within the subset is an accepting state in the NFA.",
+            "If the subset contains the initial start state of the NFA.",
+            "If the subset contains an even number of active NFA states."
+          ],
+          "correctIdx": 0,
+          "explanation": "An NFA accepts a string if at least one computation path reaches an accepting state. Therefore, a macro-state in the DFA is an accepting state if it contains at least one accepting state from the NFA."
+        },
+        {
+          "level": 5,
+          "question": "During the subset construction process, you evaluate the transitions from a macro-state and find that no states in the subset have a valid transition for a given input symbol. What state does this lead to in the DFA?",
+          "options": [
+            "The empty set state ∅, which acts as a non-accepting trap state.",
+            "The initial start state of the DFA.",
+            "The same macro-state loops back to itself.",
+            "The nearest available accepting macro-state."
+          ],
+          "correctIdx": 0,
+          "explanation": "If no transitions are defined for any state in the current subset on a given input, the result is the empty set ∅. In the DFA, this forms a non-accepting trap state that loops to itself for all inputs."
+        },
+        {
+          "level": 6,
+          "question": "Consider an NFA with states {1, 2} and no ε-transitions. If δ(1,a)={1} and δ(2,a)={1,2}, what is the transition from the DFA macro-state {1, 2} on the input symbol 'a'?",
+          "options": [
+            "{1, 2}",
+            "{1}",
+            "{2}",
+            "∅"
+          ],
+          "correctIdx": 0,
+          "explanation": "To find the transition from {1, 2} on 'a', take the union of the individual transitions: δ(1,a) ∪ δ(2,a) = {1} ∪ {1, 2} = {1, 2}. The macro-state loops back to itself."
+        },
+        {
+          "level": 7,
+          "question": "Why do many state combinations in the power set 2^Q typically not appear in the final DFA generated by subset construction?",
+          "options": [
+            "Because we only include macro-states that can actually be reached from the initial start state.",
+            "Because any non-accepting subsets are automatically discarded during construction.",
+            "Because subsets with more than three states are compressed into single states.",
+            "Because the alphabet constraints prevent large subsets from forming."
+          ],
+          "correctIdx": 0,
+          "explanation": "Although the theoretical maximum number of states is 2^|Q|, we only construct states that are reachable from the start state. This keeps the size of most practical DFAs relatively small."
+        },
+        {
+          "level": 8,
+          "question": "If an NFA has 3 states and its equivalent DFA requires all 8 possible states, what does this tell you about the computation paths of the NFA?",
+          "options": [
+            "The NFA's states can form any combination of active paths depending on the input.",
+            "The NFA must contain an infinite loop of ε-transitions.",
+            "The NFA is structurally identical to a standard DFA.",
+            "The language recognized by the NFA must be empty."
+          ],
+          "correctIdx": 0,
+          "explanation": "When a DFA requires all 2^|Q| states, it means every combination of NFA states is reachable through some sequence of inputs, demonstrating high non-determinism."
+        },
+        {
+          "level": 9,
+          "question": "An NFA has the state set Q = {1, 2, 3} where 3 is the only accepting state. If subset construction produces a DFA with the reachable states {1, 2} and {2, 3}, which of these are accepting states in the DFA?",
+          "options": [
+            "Only {2, 3} is an accepting state.",
+            "Only {1, 2} is an accepting state.",
+            "Both {1, 2} and {2, 3} are accepting states.",
+            "Neither state is an accepting state."
+          ],
+          "correctIdx": 0,
+          "explanation": "Since state 3 is the only accepting state in the NFA, any DFA macro-state containing state 3 becomes an accepting state. Therefore, {2, 3} is accepting, while {1, 2} is not."
+        },
+        {
+          "level": 10,
+          "question": "[EXAM LEVEL] Take the NFA from Umbrella 2 Level 10: Q={1,2,3}, F={3}, C_ε(1)={1,2}, C_ε(2)={2}, C_ε(3)={3,1,2}. If the DFA start state is A={1,2}, determine the target state of the transition from state A on input 'b'.",
+          "options": [
+            "The macro-state {1, 2, 3}",
+            "The macro-state {1, 2}",
+            "The macro-state {3}",
+            "The empty set state ∅"
+          ],
+          "correctIdx": 0,
+          "explanation": "Let's compute the transition step-by-step:\n1. Find the direct transitions from states 1 and 2 on input 'b': δ(1,b) ∪ δ(2,b) = ∅ ∪ {3} = {3}.\n2. Apply the ε-closure to the resulting set: C_ε({3}) = {3, 1, 2}.\nThus, the transition from state A on input 'b' leads to the macro-state {1, 2, 3}."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Regular Expressions & Language Equations (Arden's Lemma)",
+      "questions": [
+        {
+          "level": 1,
+          "question": "Which of the following correctly defines the language denoted by the regular expression R = a*b*?",
+          "options": [
+            "Any number of 'a's followed by any number of 'b's.",
+            "Strings that contain alternating 'a's and 'b's.",
+            "Strings that must start with 'a' and end with 'b'.",
+            "Only strings that have an equal number of 'a's and 'b's."
+          ],
+          "correctIdx": 0,
+          "explanation": "The star operator (*) represents zero or more repetitions. Therefore, a*b* denotes any number of 'a's followed by any number of 'b's, including the empty string ε."
+        },
+        {
+          "level": 2,
+          "question": "What language is represented by the regular expression R = (a ∪ b)*?",
+          "options": [
+            "The set of all possible strings over the alphabet {a, b}, including ε.",
+            "Strings that contain either only 'a's or only 'b's.",
+            "Strings that must contain at least one 'a' and one 'b'.",
+            "The empty language containing no valid strings."
+          ],
+          "correctIdx": 0,
+          "explanation": "The expression (a ∪ b) matches either 'a' or 'b'. Applying the Kleene star (*) allows any combination of these choices of any length, generating the entire set of strings Σ*."
+        },
+        {
+          "level": 3,
+          "question": "Which regular expression matches strings over {a, b} that do NOT contain two consecutive 'a's?",
+          "options": [
+            "(b ∪ ab)*(a ∪ ε)",
+            "(a ∪ b)*aa(a ∪ b)*",
+            "(ab)*(ba)*",
+            "b*a*b*"
+          ],
+          "correctIdx": 0,
+          "explanation": "The expression (b ∪ ab)* ensures that any 'a' is immediately followed by a 'b' or ends the string via (a ∪ ε), preventing two 'a's from appearing in a row."
+        },
+        {
+          "level": 4,
+          "question": "State the standard algebraic form of Arden's Lemma (Lemma 2.8.2 in the textbook) used to solve regular language equations.",
+          "options": [
+            "If L = BL ∪ C and ε ∉ B, then the unique solution is L = B*C.",
+            "If L = BL ∪ C, then the unique solution is L = C*B.",
+            "If L = B ∪ C, then the unique solution is L = (BC)*.",
+            "If L = B* ∪ C, then the unique solution is L = B ∪ C*."
+          ],
+          "correctIdx": 0,
+          "explanation": "Arden's Lemma states that if you have a regular language equation of the form L = BL ∪ C, where the language B does not contain the empty string ε, the unique solution is given by L = B*C."
+        },
+        {
+          "options": [
+            "L = a*b",
+            "L = b*a",
+            "L = (a ∪ b)*",
+            "L = ab*"
+          ],
+          "level": 5,
+          "question": "Using Arden's Lemma, solve the language equation L = aL ∪ b for the unknown language L (assuming ε ∉ {a}).",
+          "correctIdx": 0,
+          "explanation": "Matching the equation L = aL ∪ b to the standard form L = BL ∪ C gives B = a and C = b. Applying Arden's Lemma (L = B*C) yields the solution L = a*b."
+        },
+        {
+          "level": 6,
+          "question": "Simplify the regular expression identity: R ∪ ε = R. Under what condition is this identity true?",
+          "options": [
+            "It is true if and only if the language R already contains the empty string ε.",
+            "It is true for all possible regular expressions by default.",
+            "It is true if and only if R is the empty language ∅.",
+            "It is never true because union always increases language size."
+          ],
+          "correctIdx": 0,
+          "explanation": "The union operator combines sets. The identity R ∪ {ε} = R holds true if and only if ε is already an element of the set R."
+        },
+        {
+          "level": 7,
+          "question": "Consider the system of equations: L1 = aL1 ∪ bL2 and L2 = aL2 ∪ ε. Solve for L2 first using Arden's Lemma.",
+          "options": [
+            "L2 = a*",
+            "L2 = a*b",
+            "L2 = ε",
+            "L2 = a*ε"
+          ],
+          "correctIdx": 0,
+          "explanation": "The equation for L2 is L2 = aL2 ∪ ε. Matching this to the form L = BL ∪ C gives B = a and C = ε. Applying Arden's Lemma yields L2 = a*ε, which simplifies to a*."
+        },
+        {
+          "level": 8,
+          "question": "Substitute the resolved value of L2 = a* from the previous question into L1 = aL1 ∪ bL2, and find the final solution for L1.",
+          "options": [
+            "L1 = a*ba*",
+            "L1 = (a ∪ b)*",
+            "L1 = a*b",
+            "L1 = b*a*"
+          ],
+          "correctIdx": 0,
+          "explanation": "Substituting L2 = a* into the first equation gives L1 = aL1 ∪ ba*. Applying Arden's Lemma with B = a and C = ba* results in L1 = a*(ba*), which can be written as a*ba*."
+        },
+        {
+          "level": 9,
+          "question": "What is the regular expression equivalence rule for distributing a star closure over a union, specifically for (A*B)*A*?",
+          "options": [
+            "(A ∪ B)*",
+            "A* ∪ B*",
+            "(AB)*",
+            "A*B*"
+          ],
+          "correctIdx": 0,
+          "explanation": "A standard regular expression identity states that (A*B)*A* is equivalent to (A ∪ B)*. Both expressions generate any combination of strings composed of segments from languages A and B."
+        },
+        {
+          "level": 10,
+          "question": "[EXAM LEVEL] Solve the following system for L1 using Arden's Lemma:\nL1 = aL1 ∪ bL2 ∪ ε\nL2 = aL3 ∪ bL1\nL3 = bL3 ∪ aL2\nShow the resulting simplified expression.",
+          "options": [
+            "L1 = (a ∪ b(b*a)*b)*",
+            "L1 = a*b(b*a)*",
+            "L1 = (a*b*a)*",
+            "L1 = a* ∪ b*"
+          ],
+          "correctIdx": 0,
+          "explanation": "Let's solve the system step-by-step:\n1. Solve for L3 using the third equation: L3 = bL3 ∪ aL2 → L3 = b*aL2.\n2. Substitute L3 into the second equation: L2 = a(b*aL2) ∪ bL1 → L2 = (ab*a)L2 ∪ bL1.\n3. Apply Arden's Lemma to solve for L2: L2 = (ab*a)*bL1.\n4. Substitute L2 into the first equation: L1 = aL1 ∪ b(ab*a)*bL1 ∪ ε.\n5. Factor out L1: L1 = (a ∪ b(ab*a)*b)L1 ∪ ε.\n6. Apply Arden's Lemma one final time to get: L1 = (a ∪ b(ab*a)*b)*."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Proving Non-Regularity (The Pumping Lemma)",
+      "questions": [
+        {
+          "level": 1,
+          "question": "What is the primary purpose of the Pumping Lemma for regular languages?",
+          "options": [
+            "To prove that a given language is NOT regular via contradiction.",
+            "To prove that a given language IS regular by finding its pumping length.",
+            "To minimize the number of states needed to design a complete DFA.",
+            "To determine the total count of strings contained within a language."
+          ],
+          "correctIdx": 0,
+          "explanation": "The Pumping Lemma describes a property shared by all regular languages. It is used to prove a language is *not* regular by showing it violates this property."
+        },
+        {
+          "level": 2,
+          "question": "If a language L is regular, the Pumping Lemma guarantees the existence of a constant 'p'. What does this constant 'p' represent?",
+          "options": [
+            "The pumping length, where any string in L of length at least p can be pumped.",
+            "The maximum number of characters allowed in any string within the language.",
+            "The total number of accepting states defined in the minimal DFA.",
+            "The number of unique symbols that make up the alphabet Σ."
+          ],
+          "correctIdx": 0,
+          "explanation": "The constant p is the pumping length. For any string s in L where |s| ≥ p, s can be split into three parts, xyz, such that the middle section y can be repeated (pumped) any number of times while the resulting strings remain in L."
+        },
+        {
+          "level": 3,
+          "question": "The Pumping Lemma states that a string s can be split into three parts, s = xyz. What does the condition |y| ≥ 1 guarantee?",
+          "options": [
+            "The substring y that is being pumped cannot be empty.",
+            "The substring y must consist entirely of the first character in the alphabet.",
+            "The combined length of x and y cannot exceed the pumping length p.",
+            "The substring y must be longer than the remaining sections x and z combined."
+          ],
+          "correctIdx": 0,
+          "explanation": "The condition |y| ≥ 1 ensures that the pumped section contains at least one character, preventing trivial splits where an empty y is pumped without changing the string."
+        },
+        {
+          "level": 4,
+          "question": "What does the condition |xy| ≤ p in the Pumping Lemma tell you about where the substring y is located within the string s?",
+          "options": [
+            "The substring y must be located entirely within the first p characters of the string.",
+            "The substring y must be located at the exact center of the string.",
+            "The substring y must consist of the trailing characters at the end of the string.",
+            "The substring y can be chosen from any position along the string."
+          ],
+          "correctIdx": 0,
+          "explanation": "Because |xy| ≤ p, the combined length of the prefix x and the pumped section y cannot exceed p. This means both x and y must fit entirely within the first p characters of the string s."
+        },
+        {
+          "level": 5,
+          "question": "Why is it incorrect to pick a specific value for the pumping length p (such as p = 5) when writing a non-regularity proof?",
+          "options": [
+            "Because the lemma states that p is an arbitrary constant chosen by an adversary; your proof must hold for any valid p.",
+            "Because the pumping length must always be an odd number.",
+            "Because fixing p restricts the language to containing only finite strings.",
+            "Because the value of p must be calculated from the number of transitions."
+          ],
+          "correctIdx": 0,
+          "explanation": "In a Pumping Lemma proof, you cannot assume a specific value for p. You must treat p as an arbitrary positive integer specified by the lemma and show that a contradiction occurs for any valid choice of p."
+        },
+        {
+          "level": 6,
+          "question": "When choosing a string s to prove that L = {a^n b^n | n ≥ 0} is not regular, which choice of s is valid and strategic?",
+          "options": [
+            "s = a^p b^p",
+            "s = a^5 b^5",
+            "s = a^(p/2) b^(p/2)",
+            "s = ab"
+          ],
+          "correctIdx": 0,
+          "explanation": "To apply the lemma, the length of the string must be at least p. The string s = a^p b^p is a valid and strategic choice because |s| = 2p ≥ p, and its uniform structure simplifies finding a contradiction."
+        },
+        {
+          "level": 7,
+          "question": "Let s = a^p b^p be the chosen string for the language L = {a^n b^n | n ≥ 0}. Given the condition |xy| ≤ p, what must the substring y consist of?",
+          "options": [
+            "It must consist entirely of 'a's.",
+            "It must consist entirely of 'b's.",
+            "It contains an equal mix of 'a's and 'b's.",
+            "It can be any combination of 'a's and 'b's."
+          ],
+          "correctIdx": 0,
+          "explanation": "Because |xy| ≤ p, the first p characters of s are all 'a's. Therefore, the substring y must consist entirely of 'a's (i.e., y = a^k for some k ≥ 1)."
+        },
+        {
+          "level": 8,
+          "question": "Using the split from the previous question where y = a^k (k ≥ 1), if you pump the string up by setting i = 2, what is the structure of the resulting string xy^2z?",
+          "options": [
+            "a^(p+k) b^p",
+            "a^p b^(p+k)",
+            "a^(p+2k) b^p",
+            "a^p b^p"
+          ],
+          "correctIdx": 0,
+          "explanation": "Pumping up to i = 2 adds one extra copy of y. Since y = a^k, the number of 'a's increases by k, resulting in the string a^(p+k) b^p."
+        },
+        {
+          "level": 9,
+          "question": "Why does the pumped string s' = a^(p+k) b^p (where k ≥ 1) provide the contradiction needed to complete the proof for L = {a^n b^n}?",
+          "options": [
+            "Because the number of 'a's no longer equals the number of 'b's, meaning s' is not in L.",
+            "Because the total length of the string is no longer an even number.",
+            "Because the string now contains out-of-order characters.",
+            "Because the string has grown larger than the maximum allowed pumping length."
+          ],
+          "correctIdx": 0,
+          "explanation": "The definition of L requires the number of 'a's to equal the number of 'b's. In the pumped string s', the number of 'a's is p+k and the number of 'b's is p. Since k ≥ 1, these counts are unequal, so s' ∉ L, creating a contradiction."
+        },
+        {
+          "level": 10,
+          "question": "[EXAM LEVEL] Consider the language L = {a^n b^m c^(n+m) | n, m ≥ 0}. If we choose the string s = a^p b^p c^(2p) and apply the Pumping Lemma, which value of i provides a clean contradiction to prove that L is not regular?",
+          "options": [
+            "i = 0 (or any i ≠ 1)",
+            "Only i = 2",
+            "Only i = 5",
+            "No value of i works because the language is actually regular"
+          ],
+          "correctIdx": 0,
+          "explanation": "Because |xy| ≤ p, the substring y must consist entirely of 'a's (y = a^k where k ≥ 1). If we set i = 0 (pumping down), the resulting string is s' = a^(p-k) b^p c^(2p). For s' to belong to L, the number of 'c's must equal the sum of 'a's and 'b's: (p-k) + p = 2p - k. Since k ≥ 1, 2p - k ≠ 2p, so s' ∉ L, creating a contradiction."
+        }
+      ]
+    }
+  ]
+}
