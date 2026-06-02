@@ -105,7 +105,7 @@
 
     <div id="quiz-screen" class="card hidden">
         <div class="quiz-header">
-            <span id="quiz-category" style="font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.85rem; tracking-letter: 0.05em;">Umbrella Focus</span>
+            <span id="quiz-category" style="font-weight: 700; color: var(--primary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.05em;">Umbrella Focus</span>
             <span id="quiz-progress" style="color: var(--text-secondary); font-weight: 600;">Question 1 of 10</span>
         </div>
         <div class="progress-bar-container">
@@ -150,6 +150,9 @@
 
     // Handle File Uploads
     document.getElementById('file-input').addEventListener('change', function(e) {
+        if (!e.target.files || e.target.files.length === 0) {
+            return;
+        }
         let reader = new FileReader();
         reader.onload = function(event) {
             document.getElementById('json-paste').value = event.target.result;
@@ -182,7 +185,7 @@
             card.onclick = () => startQuiz(umb.id);
             card.innerHTML = `
                 <h4>Umbrella ${umb.id}: ${umb.title}</h4>
-                <p>Contains ${umb.questions.length} structured skill levels up to exam difficulty.</p>
+                <p>Contains ${umb.questions.length} structured questions up to exam difficulty.</p>
             `;
             grid.appendChild(card);
         });
@@ -207,7 +210,10 @@
                 activeQuestions = activeQuestions.concat(umb.questions);
             });
             // Shuffle mixed questions
-            activeQuestions.sort(() => Math.random() - 0.5);
+            for (let i = activeQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [activeQuestions[i], activeQuestions[j]] = [activeQuestions[j], activeQuestions[i]];
+            }
         } else {
             const selected = masterData.umbrellas.find(u => u.id == umbrellaId);
             document.getElementById('quiz-category').innerText = `Umbrella ${selected.id}: ${selected.title}`;
@@ -228,7 +234,7 @@
         const q = activeQuestions[currentIndex];
         
         // Progress handling
-        document.getElementById('quiz-progress').innerText = `Level Question ${currentIndex + 1} of ${activeQuestions.length}`;
+        document.getElementById('quiz-progress').innerText = `Question ${currentIndex + 1} of ${activeQuestions.length}`;
         document.getElementById('progress-bar').style.width = `${((currentIndex) / activeQuestions.length) * 100}%`;
 
         document.getElementById('q-text').innerText = `[Level ${q.level}] ${q.question}`;
@@ -302,7 +308,7 @@
     }
 
     function exitQuiz() {
-        if(confirm("Are you sure you want to exit this current running track? Progress will be dropped.")) {
+        if (confirm("Are you sure you want to exit this current running track? Progress will be dropped.")) {
             showDashboard();
         }
     }
